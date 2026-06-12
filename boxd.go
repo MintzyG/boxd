@@ -94,7 +94,11 @@ func Run(t *testing.T, opts ...Option) *Container {
 	id := createContainer(t, ctx, d, image, cfg)
 	c := inspectContainer(t, ctx, d, id)
 
-	startLogs(t, d, id, image, cfg.logMode)
+	logLabel := image
+	if cfg.build != nil {
+		logLabel = cfg.build.context + "/" + cfg.build.dockerfile
+	}
+	startLogs(t, d, id, logLabel, cfg.logMode)
 
 	for _, pc := range cfg.ports {
 		if err := waitForPort(c, pc); err != nil {
