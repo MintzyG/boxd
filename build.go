@@ -30,12 +30,9 @@ func WithDockerfile(contextPath string, dockerfile ...string) Option {
 }
 
 // WithNoCache disables Docker's build cache for this build.
+// Must be used together with WithDockerfile; has no effect with WithImage and Run will fatal.
 func WithNoCache() Option {
-	return func(c *config) {
-		if c.build != nil {
-			c.build.noCache = true
-		}
-	}
+	return func(c *config) { c.noCache = true }
 }
 
 func buildImage(ctx context.Context, d *dockerClient, bc *buildConfig) (string, error) {
