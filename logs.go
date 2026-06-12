@@ -13,6 +13,9 @@ type logConfig struct {
 	mode LogMode
 }
 
+// WithLogs enables container log streaming.
+// LogAlways streams each line to t.Log in real time.
+// LogOnFailure buffers logs and dumps them only if the test fails.
 func WithLogs(mode LogMode) Option {
 	return func(c *config) { c.logMode = &logConfig{mode: mode} }
 }

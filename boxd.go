@@ -6,9 +6,14 @@ import (
 	"time"
 )
 
+// Container holds the runtime details of a started container.
+// It is returned by Run and is valid for the lifetime of the test.
 type Container struct {
-	ID    string
-	Host  string
+	// ID is the Docker container ID.
+	ID string
+	// Host is the hostname to reach the container on, typically "localhost".
+	Host string
+	// Ports maps container ports (e.g. "5432/tcp") to their host-side port numbers.
 	Ports map[string]string
 	d     *dockerClient
 }
@@ -23,16 +28,23 @@ type config struct {
 	build       *buildConfig
 }
 
+// Option configures a container before it is started.
 type Option func(*config)
 
+// WithImage sets the Docker image to pull and run.
+// Mutually exclusive with WithDockerfile.
 func WithImage(image string) Option {
 	return func(c *config) { c.image = image }
 }
 
+// WithEnv sets an environment variable on the container.
 func WithEnv(k, v string) Option {
 	return func(c *config) { c.env = append(c.env, k+"="+v) }
 }
 
+// WithPort exposes a container port and maps it to a random host port.
+// If a timeout is given, Run will block until the port accepts TCP connections
+// or the timeout expires. Without a timeout, the port is mapped but not waited on.
 func WithPort(port string, timeout ...time.Duration) Option {
 	var t time.Duration
 	if len(timeout) > 0 {
@@ -41,6 +53,8 @@ func WithPort(port string, timeout ...time.Duration) Option {
 	return func(c *config) { c.ports = append(c.ports, portConfig{port: port, timeout: t}) }
 }
 
+// WithHealthCheck attaches a Docker healthcheck to the container.
+// Use with WaitForHealthy to block until the container reports healthy.
 func WithHealthCheck(hc HealthCheck) Option {
 	return func(c *config) {
 		c.healthCheck = &healthCheck{
@@ -52,6 +66,9 @@ func WithHealthCheck(hc HealthCheck) Option {
 	}
 }
 
+// Run starts a Docker container for the duration of the test.
+// The container is removed automatically when the test ends.
+// Requires exactly one of WithImage or WithDockerfile.
 func Run(t *testing.T, opts ...Option) *Container {
 	t.Helper()
 	ctx := context.Background()

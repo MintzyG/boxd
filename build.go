@@ -14,6 +14,10 @@ type buildConfig struct {
 	dockerfile string
 }
 
+// WithDockerfile builds an image from a local Dockerfile and runs it.
+// contextPath is the build context directory. dockerfile defaults to "Dockerfile"
+// and can be overridden by passing a second argument.
+// Mutually exclusive with WithImage.
 func WithDockerfile(contextPath string, dockerfile ...string) Option {
 	df := "Dockerfile"
 	if len(dockerfile) > 0 {

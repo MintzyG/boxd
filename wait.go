@@ -7,10 +7,13 @@ import (
 	"time"
 )
 
+// WaitStrategy blocks Run until a container is considered ready.
+// Implement this interface to define custom readiness checks.
 type WaitStrategy interface {
 	Wait(c *Container) error
 }
 
+// WithWait sets the readiness strategy Run will block on after the container starts.
 func WithWait(w WaitStrategy) Option {
 	return func(c *config) { c.waitStrat = w }
 }
@@ -44,6 +47,7 @@ type statusWait struct {
 	timeout time.Duration
 }
 
+// WaitForRunning waits until the container status is "running".
 func WaitForRunning(timeout time.Duration) WaitStrategy {
 	return &statusWait{timeout: timeout}
 }
@@ -67,6 +71,8 @@ type healthWait struct {
 	timeout time.Duration
 }
 
+// WaitForHealthy waits until Docker reports the container as healthy.
+// Requires a healthcheck to be configured via WithHealthCheck.
 func WaitForHealthy(timeout time.Duration) WaitStrategy {
 	return &healthWait{timeout: timeout}
 }
