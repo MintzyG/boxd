@@ -50,17 +50,17 @@ See [`examples/postgres`](examples/postgres) for a full example with `ConnStr()`
 
 ## Options
 
-| Option                                | Description                                                                                                               |
-|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
-| `WithImage(image)`                    | Pull and run an image. Mutually exclusive with `WithDockerfile`.                                                          |
-| `WithDockerfile(ctx, ...BuildOption)` | Build from a local Dockerfile and run it. Accepts `WithDockerfileName` and `WithNoCache` as build options.                |
-| `WithDockerfileName(name)`            | Override the Dockerfile name (default `"Dockerfile"`). Pass as a `BuildOption` to `WithDockerfile`.                      |
-| `WithNoCache()`                       | Disable Docker layer cache. Pass as a `BuildOption` to `WithDockerfile`.                                                  |
-| `WithEnv(k, v)`                       | Set an environment variable.                                                                                              |
+| Option                                | Description                                                                                                                 |
+|---------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `WithImage(image)`                    | Pull and run an image. Mutually exclusive with `WithDockerfile`.                                                            |
+| `WithDockerfile(ctx, ...BuildOption)` | Build from a local Dockerfile and run it. Accepts `WithDockerfileName` and `WithNoCache` as build options.                  |
+| `WithDockerfileName(name)`            | Override the Dockerfile name (default `"Dockerfile"`). Pass as a `BuildOption` to `WithDockerfile`.                         |
+| `WithNoCache()`                       | Disable Docker layer cache. Pass as a `BuildOption` to `WithDockerfile`.                                                    |
+| `WithEnv(k, v)`                       | Set an environment variable.                                                                                                |
 | `WithPort(port, ...timeout)`          | Expose a port (`"5432"` or `"5432/udp"`). Bare numbers default to TCP. Optional timeout waits until it accepts connections. |
-| `WithHealthCheck(HealthCheck{...})`   | Attach a Docker healthcheck.                                                                                              |
-| `WithWait(strategy)`                  | Block until a readiness strategy passes.                                                                                  |
-| `WithLogs(mode)`                      | Stream logs. `LogAlways` streams in real time, `LogOnFailure` dumps on test failure.                                      |
+| `WithHealthCheck(HealthCheck{...})`   | Attach a Docker healthcheck.                                                                                                |
+| `WithWait(strategy)`                  | Block until a readiness strategy passes.                                                                                    |
+| `WithLogs(mode)`                      | Stream logs. `LogAlways` streams in real time, `LogOnFailure` dumps on test failure.                                        |
 
 ## Container methods
 
