@@ -3,7 +3,6 @@ package boxd
 import (
 	"context"
 	"testing"
-	"time"
 )
 
 // Container holds the runtime details of a started container.
@@ -41,17 +40,6 @@ func WithImage(image string) Option {
 // WithEnv sets an environment variable on the container.
 func WithEnv(k, v string) Option {
 	return func(c *config) { c.env = append(c.env, k+"="+v) }
-}
-
-// WithPort exposes a container port and maps it to a random host port.
-// If a timeout is given, Run will block until the port accepts TCP connections
-// or the timeout expires. Without a timeout, the port is mapped but not waited on.
-func WithPort(port string, timeout ...time.Duration) Option {
-	var t time.Duration
-	if len(timeout) > 0 {
-		t = timeout[0]
-	}
-	return func(c *config) { c.ports = append(c.ports, portConfig{port: port, timeout: t}) }
 }
 
 // WithHealthCheck attaches a Docker healthcheck to the container.
