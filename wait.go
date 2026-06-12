@@ -40,7 +40,7 @@ func waitForPort(c *Container, pc portConfig) error {
 	}
 	hostPort, ok := c.Ports[pc.port]
 	if !ok {
-		return fmt.Errorf("port %s not mapped", pc.port)
+		return fmt.Errorf("boxd: port %s not mapped", pc.port)
 	}
 	deadline := time.Now().Add(pc.timeout)
 	for time.Now().Before(deadline) {
@@ -51,7 +51,7 @@ func waitForPort(c *Container, pc portConfig) error {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-	return fmt.Errorf("timeout waiting for port %s", pc.port)
+	return fmt.Errorf("boxd: timeout waiting for port %s", pc.port)
 }
 
 type statusWait struct {
@@ -75,7 +75,7 @@ func (w *statusWait) Wait(c *Container) error {
 		}
 		time.Sleep(200 * time.Millisecond)
 	}
-	return fmt.Errorf("timeout waiting for running")
+	return fmt.Errorf("boxd: timeout waiting for running")
 }
 
 type healthWait struct {
@@ -100,5 +100,5 @@ func (w *healthWait) Wait(c *Container) error {
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
-	return fmt.Errorf("timeout waiting for healthy")
+	return fmt.Errorf("boxd: timeout waiting for healthy")
 }

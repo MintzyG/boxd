@@ -102,7 +102,7 @@ func (d *dockerClient) doRaw(ctx context.Context, method, path, contentType stri
 	if resp.StatusCode >= 400 {
 		b, _ := io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
-		return nil, fmt.Errorf("docker: %s %s -> %d: %s", method, path, resp.StatusCode, b)
+		return nil, fmt.Errorf("boxd: %s %s -> %d: %s", method, path, resp.StatusCode, b)
 	}
 	return resp, nil
 }
@@ -200,14 +200,14 @@ func (d *dockerClient) build(ctx context.Context, tar io.Reader, dockerfile stri
 			break
 		}
 		if msg.Error != "" {
-			return "", fmt.Errorf("docker: build error: %s", msg.Error)
+			return "", fmt.Errorf("boxd: build error: %s", msg.Error)
 		}
 		if after, ok := strings.CutPrefix(msg.Stream, "Successfully built "); ok {
 			imageID = strings.TrimSpace(after)
 		}
 	}
 	if imageID == "" {
-		return "", fmt.Errorf("docker: build did not produce an image ID")
+		return "", fmt.Errorf("boxd: build did not produce an image ID")
 	}
 	return imageID, nil
 }
