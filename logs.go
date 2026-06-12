@@ -33,7 +33,7 @@ func startLogs(t *testing.T, d *dockerClient, id, image string, lm *LogMode) {
 
 	if *lm == LogAlways {
 		done := streamLines(rc, func(line string) { t.Log(prefix, line) })
-		t.Cleanup(func() { cancel(); <-done })
+		t.Cleanup(func() { cancel(); <-done; rc.Close() })
 		return
 	}
 
@@ -42,6 +42,7 @@ func startLogs(t *testing.T, d *dockerClient, id, image string, lm *LogMode) {
 	t.Cleanup(func() {
 		cancel()
 		<-done
+		rc.Close()
 		if t.Failed() {
 			for _, line := range buf {
 				t.Log(prefix, line)
@@ -50,11 +51,10 @@ func startLogs(t *testing.T, d *dockerClient, id, image string, lm *LogMode) {
 	})
 }
 
-func streamLines(rc io.ReadCloser, fn func(string)) <-chan struct{} {
+func streamLines(rc io.Reader, fn func(string)) <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
-		defer rc.Close()
 		r := bufio.NewReader(rc)
 		for {
 			line, err := readDockerLine(r)
