@@ -56,12 +56,18 @@ func waitForPort(c *Container, pc portConfig) error {
 }
 
 type statusWait struct {
-	timeout time.Duration
+	timeout  time.Duration
+	interval time.Duration
 }
 
 // WaitForRunning waits until the container status is "running".
-func WaitForRunning(timeout time.Duration) WaitStrategy {
-	return &statusWait{timeout: timeout}
+// An optional second argument sets the poll interval (default 200ms).
+func WaitForRunning(timeout time.Duration, interval ...time.Duration) WaitStrategy {
+	d := 200 * time.Millisecond
+	if len(interval) > 0 {
+		d = interval[0]
+	}
+	return &statusWait{timeout: timeout, interval: d}
 }
 
 func (w *statusWait) Wait(c *Container) error {
@@ -74,19 +80,25 @@ func (w *statusWait) Wait(c *Container) error {
 		if info.State.Status == "running" {
 			return nil
 		}
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(w.interval)
 	}
 	return fmt.Errorf("boxd: timeout waiting for running")
 }
 
 type healthWait struct {
-	timeout time.Duration
+	timeout  time.Duration
+	interval time.Duration
 }
 
 // WaitForHealthy waits until Docker reports the container as healthy.
 // Requires a healthcheck to be configured via WithHealthCheck.
-func WaitForHealthy(timeout time.Duration) WaitStrategy {
-	return &healthWait{timeout: timeout}
+// An optional second argument sets the poll interval (default 500ms).
+func WaitForHealthy(timeout time.Duration, interval ...time.Duration) WaitStrategy {
+	d := 500 * time.Millisecond
+	if len(interval) > 0 {
+		d = interval[0]
+	}
+	return &healthWait{timeout: timeout, interval: d}
 }
 
 func (w *healthWait) Wait(c *Container) error {
@@ -99,7 +111,7 @@ func (w *healthWait) Wait(c *Container) error {
 		if info.State.Health.Status == "healthy" {
 			return nil
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(w.interval)
 	}
 	return fmt.Errorf("boxd: timeout waiting for healthy")
 }
