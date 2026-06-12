@@ -23,7 +23,7 @@ type config struct {
 	env         []string
 	ports       []portConfig
 	waitStrat   WaitStrategy
-	logMode     *logConfig
+	logMode     *LogMode
 	healthCheck *healthCheck
 	build       *buildConfig
 	noCache     bool

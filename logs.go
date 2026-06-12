@@ -9,19 +9,15 @@ import (
 	"testing"
 )
 
-type logConfig struct {
-	mode LogMode
-}
-
 // WithLogs enables container log streaming.
 // LogAlways streams each line to t.Log in real time.
 // LogOnFailure buffers logs and dumps them only if the test fails.
 func WithLogs(mode LogMode) Option {
-	return func(c *config) { c.logMode = &logConfig{mode: mode} }
+	return func(c *config) { c.logMode = &mode }
 }
 
-func startLogs(t *testing.T, d *dockerClient, id, image string, lc *logConfig) {
-	if lc == nil {
+func startLogs(t *testing.T, d *dockerClient, id, image string, lm *LogMode) {
+	if lm == nil {
 		return
 	}
 
@@ -35,7 +31,7 @@ func startLogs(t *testing.T, d *dockerClient, id, image string, lc *logConfig) {
 		return
 	}
 
-	if lc.mode == LogAlways {
+	if *lm == LogAlways {
 		done := streamLines(rc, func(line string) { t.Log(prefix, line) })
 		t.Cleanup(func() { cancel(); <-done })
 		return
