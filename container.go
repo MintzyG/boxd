@@ -2,8 +2,6 @@ package boxd
 
 import (
 	"context"
-	"net/url"
-	"os"
 	"strings"
 	"testing"
 )
@@ -21,17 +19,6 @@ func normalizePort(port string) string {
 // Returns an empty string if the port was not mapped.
 func (c *Container) Port(port string) string {
 	return c.Ports[normalizePort(port)]
-}
-
-func dockerHost() string {
-	if host := os.Getenv("DOCKER_HOST"); host != "" {
-		if strings.HasPrefix(host, "tcp://") {
-			if u, err := url.Parse(host); err == nil {
-				return u.Hostname()
-			}
-		}
-	}
-	return "localhost"
 }
 
 func createContainer(t *testing.T, ctx context.Context, d *dockerClient, image string, cfg *config) string {
@@ -83,5 +70,5 @@ func inspectContainer(t *testing.T, ctx context.Context, d *dockerClient, id str
 		}
 	}
 
-	return &Container{ID: id, Host: dockerHost(), Ports: ports, d: d}
+	return &Container{ID: id, Host: d.host, Ports: ports, d: d}
 }

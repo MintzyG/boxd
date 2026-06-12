@@ -15,6 +15,7 @@ import (
 type dockerClient struct {
 	http    *http.Client
 	baseURL string
+	host    string
 }
 
 type createBody struct {
@@ -67,16 +68,19 @@ func newDockerClient() *dockerClient {
 		case strings.HasPrefix(host, "unix://"):
 			socketPath = strings.TrimPrefix(host, "unix://")
 		case strings.HasPrefix(host, "tcp://"):
-			// TCP host: use it directly without a Unix socket transport.
+			addr := strings.TrimPrefix(host, "tcp://")
+			hostname, _, _ := strings.Cut(addr, ":")
 			return &dockerClient{
 				http:    &http.Client{},
-				baseURL: "http://" + strings.TrimPrefix(host, "tcp://"),
+				baseURL: "http://" + addr,
+				host:    hostname,
 			}
 		}
 	}
 
 	return &dockerClient{
 		baseURL: baseURL,
+		host:    "localhost",
 		http: &http.Client{
 			Transport: &http.Transport{
 				DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
