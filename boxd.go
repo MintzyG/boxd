@@ -115,7 +115,11 @@ func Run(t *testing.T, opts ...Option) *Container {
 	}
 
 	t.Cleanup(func() {
-		_ = d.remove(context.Background(), id)
+		ctx := context.Background()
+		_ = d.remove(ctx, id)
+		if cfg.build != nil {
+			_ = d.removeImage(ctx, image)
+		}
 	})
 
 	return c

@@ -220,3 +220,12 @@ func (d *dockerClient) remove(ctx context.Context, id string) error {
 	_, _ = io.Copy(io.Discard, resp.Body)
 	return resp.Body.Close()
 }
+
+func (d *dockerClient) removeImage(ctx context.Context, id string) error {
+	resp, err := d.do(ctx, http.MethodDelete, "/images/"+id+"?force=true", nil)
+	if err != nil {
+		return err
+	}
+	_, _ = io.Copy(io.Discard, resp.Body)
+	return resp.Body.Close()
+}
