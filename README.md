@@ -19,7 +19,7 @@ func TestMyService(t *testing.T) {
         boxd.WithPort("6379/tcp", 10*time.Second),
     )
 
-    addr := c.Host + ":" + c.Ports["6379/tcp"]
+    addr := c.Host + ":" + c.Port("6379")
     // connect, run your tests, container is removed when the test ends
 }
 ```
@@ -42,7 +42,7 @@ func Run(t *testing.T) *RedisContainer {
 }
 
 func (c *RedisContainer) Addr() string {
-    return c.Host + ":" + c.Ports["6379/tcp"]
+    return c.Host + ":" + c.Port("6379")
 }
 ```
 

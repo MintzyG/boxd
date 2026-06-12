@@ -25,7 +25,7 @@ func TestPostgres(t *testing.T) {
 		boxd.WithWait(boxd.WaitForHealthy(30*time.Second)),
 	)
 
-	connStr := fmt.Sprintf("postgres://postgres:pass@%s:%s/postgres?sslmode=disable", c.Host, c.Ports["5432/tcp"])
+	connStr := fmt.Sprintf("postgres://postgres:pass@%s:%s/postgres?sslmode=disable", c.Host, c.Port("5432"))
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

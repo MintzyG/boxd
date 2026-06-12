@@ -23,7 +23,7 @@ func TestNginx(t *testing.T) {
 		boxd.WithWait(boxd.WaitForHealthy(30*time.Second)),
 	)
 
-	resp, err := http.Get("http://" + c.Host + ":" + c.Ports["80/tcp"])
+	resp, err := http.Get("http://" + c.Host + ":" + c.Port("80"))
 	if err != nil {
 		t.Fatal(err)
 	}

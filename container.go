@@ -8,6 +8,16 @@ import (
 	"testing"
 )
 
+// Port returns the host-side port mapped to the given container port number.
+// The port argument is just the number, e.g. "5432" no protocol suffix needed.
+// Returns an empty string if the port was not mapped.
+func (c *Container) Port(port string) string {
+	if p, ok := c.Ports[port+"/tcp"]; ok {
+		return p
+	}
+	return c.Ports[port+"/udp"]
+}
+
 func dockerHost() string {
 	if host := os.Getenv("DOCKER_HOST"); host != "" {
 		if strings.HasPrefix(host, "tcp://") {

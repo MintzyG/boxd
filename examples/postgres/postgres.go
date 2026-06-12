@@ -58,7 +58,7 @@ func Run(t *testing.T, opts ...boxd.Option) *PostgresContainer {
 func (c *PostgresContainer) ConnStr() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		c.User, c.Password, c.Host, c.Ports["5432/tcp"], c.Database,
+		c.User, c.Password, c.Host, c.Port("5432"), c.Database,
 	)
 }
 

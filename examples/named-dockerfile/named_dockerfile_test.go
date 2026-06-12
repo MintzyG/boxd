@@ -26,7 +26,7 @@ func TestDevBuild(t *testing.T) {
 		boxd.WithLogs(boxd.LogAlways),
 	)
 
-	resp, err := http.Get("http://" + c.Host + ":" + c.Ports["8080/tcp"])
+	resp, err := http.Get("http://" + c.Host + ":" + c.Port("8080"))
 	if err != nil {
 		t.Fatal(err)
 	}
