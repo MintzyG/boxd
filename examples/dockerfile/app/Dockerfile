@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:1.26.4-alpine
 RUN apk add --no-cache wget
 WORKDIR /app
 COPY go.mod .
