@@ -21,6 +21,17 @@ func (c *Container) Port(port string) string {
 	return c.Ports[normalizePort(port)]
 }
 
+// MustPort returns the host-side port mapped to the given container port.
+// Calls t.Fatal if the port was not mapped.
+func (c *Container) MustPort(t *testing.T, port string) string {
+	t.Helper()
+	p := c.Ports[normalizePort(port)]
+	if p == "" {
+		t.Fatalf("boxd: port %s not mapped", port)
+	}
+	return p
+}
+
 func createContainer(t *testing.T, ctx context.Context, d *dockerClient, image string, cfg *config) string {
 	t.Helper()
 
