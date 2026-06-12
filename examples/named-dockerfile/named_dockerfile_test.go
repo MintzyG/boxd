@@ -14,7 +14,7 @@ import (
 // Useful when a repo has multiple Dockerfiles (e.g. Dockerfile.dev, Dockerfile.prod).
 func TestDevBuild(t *testing.T) {
 	c := boxd.Run(t,
-		boxd.WithDockerfile("app", "Dockerfile.dev"),
+		boxd.WithDockerfile("app", boxd.WithDockerfileName("Dockerfile.dev")),
 		boxd.WithHealthCheck(boxd.HealthCheck{
 			Test:     []string{"CMD-SHELL", "wget -qO- http://localhost:8080 || exit 1"},
 			Interval: 2 * time.Second,

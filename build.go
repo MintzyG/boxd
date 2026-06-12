@@ -15,24 +15,30 @@ type buildConfig struct {
 	noCache    bool
 }
 
-// WithDockerfile builds an image from a local Dockerfile and runs it.
-// contextPath is the build context directory. dockerfile defaults to "Dockerfile"
-// and can be overridden by passing a second argument.
-// Mutually exclusive with WithImage.
-func WithDockerfile(contextPath string, dockerfile ...string) Option {
-	df := "Dockerfile"
-	if len(dockerfile) > 0 {
-		df = dockerfile[0]
-	}
-	return func(c *config) {
-		c.build = &buildConfig{context: contextPath, dockerfile: df}
-	}
+// BuildOption configures a Dockerfile build.
+type BuildOption func(*buildConfig)
+
+// WithDockerfileName overrides the Dockerfile name within the build context (default "Dockerfile").
+func WithDockerfileName(name string) BuildOption {
+	return func(bc *buildConfig) { bc.dockerfile = name }
 }
 
-// WithNoCache disables Docker's build cache for this build.
-// Must be used together with WithDockerfile; has no effect with WithImage and Run will fatal.
-func WithNoCache() Option {
-	return func(c *config) { c.noCache = true }
+// WithNoCache disables Docker's layer cache for this build.
+func WithNoCache() BuildOption {
+	return func(bc *buildConfig) { bc.noCache = true }
+}
+
+// WithDockerfile builds an image from a local Dockerfile and runs it.
+// contextPath is the build context directory. Defaults to "Dockerfile".
+// Mutually exclusive with WithImage.
+func WithDockerfile(contextPath string, opts ...BuildOption) Option {
+	return func(c *config) {
+		bc := &buildConfig{context: contextPath, dockerfile: "Dockerfile"}
+		for _, o := range opts {
+			o(bc)
+		}
+		c.build = bc
+	}
 }
 
 func buildImage(ctx context.Context, d *dockerClient, bc *buildConfig) (string, error) {

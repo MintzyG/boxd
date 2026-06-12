@@ -25,7 +25,6 @@ type config struct {
 	logMode     *LogMode
 	healthCheck *healthCheck
 	build       *buildConfig
-	noCache     bool
 }
 
 // Option configures a container before it is started.
@@ -72,12 +71,6 @@ func Run(t *testing.T, opts ...Option) *Container {
 	}
 	if cfg.image == "" && cfg.build == nil {
 		t.Fatal("boxd: one of WithImage or WithDockerfile is required")
-	}
-	if cfg.noCache && cfg.build == nil {
-		t.Fatal("boxd: WithNoCache requires WithDockerfile")
-	}
-	if cfg.build != nil {
-		cfg.build.noCache = cfg.noCache
 	}
 
 	d := newDockerClient()
