@@ -6,6 +6,18 @@ import (
 	"testing"
 )
 
+// Container holds the runtime details of a started container.
+// It is returned by Run and is valid for the lifetime of the test.
+type Container struct {
+	// ID is the Docker container ID.
+	ID string
+	// Host is the hostname to reach the container on, typically "localhost".
+	Host string
+	// Ports maps container ports (e.g. "5432/tcp") to their host-side port numbers.
+	Ports map[string]string
+	d     *dockerClient
+}
+
 // normalizePort appends "/tcp" if port has no protocol suffix.
 func normalizePort(port string) string {
 	if strings.Contains(port, "/") {
