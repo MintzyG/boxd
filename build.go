@@ -3,6 +3,7 @@ package boxd
 import (
 	"archive/tar"
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -35,6 +36,9 @@ func WithNoCache() Option {
 }
 
 func buildImage(ctx context.Context, d *dockerClient, bc *buildConfig) (string, error) {
+	if _, err := os.Stat(bc.context); err != nil {
+		return "", fmt.Errorf("boxd: build context not found: %s", bc.context)
+	}
 	return d.build(ctx, tarDir(bc.context), bc.dockerfile, bc.noCache)
 }
 
