@@ -40,7 +40,7 @@ func Run(t *testing.T, opts ...boxd.Option) *PostgresContainer {
 			Timeout:  1 * time.Second,
 			Retries:  5,
 		}),
-		boxd.WithPort("5432/tcp"),
+		boxd.WithPort("5432"),
 		boxd.WithWait(boxd.WaitForHealthy(30 * time.Second)),
 	}
 

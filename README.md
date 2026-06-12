@@ -16,7 +16,7 @@ go get github.com/MintzyG/boxd
 func TestMyService(t *testing.T) {
     c := boxd.Run(t,
         boxd.WithImage("redis:7-alpine"),
-        boxd.WithPort("6379/tcp", 10*time.Second),
+        boxd.WithPort("6379", 10*time.Second),
     )
 
     addr := c.Host + ":" + c.Port("6379")
@@ -37,7 +37,7 @@ type RedisContainer struct{ *boxd.Container }
 func Run(t *testing.T) *RedisContainer {
     return &RedisContainer{boxd.Run(t,
         boxd.WithImage("redis:7-alpine"),
-        boxd.WithPort("6379/tcp", 10*time.Second),
+        boxd.WithPort("6379", 10*time.Second),
     )}
 }
 
@@ -50,16 +50,16 @@ See [`examples/postgres`](examples/postgres) for a full example with `ConnStr()`
 
 ## Options
 
-| Option                              | Description                                                                          |
-|-------------------------------------|--------------------------------------------------------------------------------------|
-| `WithImage(image)`                  | Pull and run an image. Mutually exclusive with `WithDockerfile`.                     |
-| `WithDockerfile(ctx, ...name)`      | Build from a local Dockerfile and run it. Defaults to `"Dockerfile"`.                |
-| `WithNoCache()`                     | Disable Docker layer cache for the build.                                            |
-| `WithEnv(k, v)`                     | Set an environment variable.                                                         |
-| `WithPort(port, ...timeout)`        | Expose a port. Optional timeout waits until it accepts TCP connections.              |
-| `WithHealthCheck(HealthCheck{...})` | Attach a Docker healthcheck.                                                         |
-| `WithWait(strategy)`                | Block until a readiness strategy passes.                                             |
-| `WithLogs(mode)`                    | Stream logs. `LogAlways` streams in real time, `LogOnFailure` dumps on test failure. |
+| Option                              | Description                                                                                                                 |
+|-------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| `WithImage(image)`                  | Pull and run an image. Mutually exclusive with `WithDockerfile`.                                                            |
+| `WithDockerfile(ctx, ...name)`      | Build from a local Dockerfile and run it. Defaults to `"Dockerfile"`.                                                       |
+| `WithNoCache()`                     | Disable Docker layer cache for the build.                                                                                   |
+| `WithEnv(k, v)`                     | Set an environment variable.                                                                                                |
+| `WithPort(port, ...timeout)`        | Expose a port (`"5432"` or `"5432/udp"`). Bare numbers default to TCP. Optional timeout waits until it accepts connections. |
+| `WithHealthCheck(HealthCheck{...})` | Attach a Docker healthcheck.                                                                                                |
+| `WithWait(strategy)`                | Block until a readiness strategy passes.                                                                                    |
+| `WithLogs(mode)`                    | Stream logs. `LogAlways` streams in real time, `LogOnFailure` dumps on test failure.                                        |
 
 ## Wait strategies
 

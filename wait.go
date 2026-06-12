@@ -24,14 +24,15 @@ type portConfig struct {
 }
 
 // WithPort exposes a container port and maps it to a random host port.
-// If a timeout is given, Run will block until the port accepts TCP connections
+// Accepts a bare number ("5432") which defaults to TCP, or a full pair ("5432/udp").
+// If a timeout is given, Run will block until the port accepts connections
 // or the timeout expires. Without a timeout, the port is mapped but not waited on.
 func WithPort(port string, timeout ...time.Duration) Option {
 	var t time.Duration
 	if len(timeout) > 0 {
 		t = timeout[0]
 	}
-	return func(c *config) { c.ports = append(c.ports, portConfig{port: port, timeout: t}) }
+	return func(c *config) { c.ports = append(c.ports, portConfig{port: normalizePort(port), timeout: t}) }
 }
 
 func waitForPort(c *Container, pc portConfig) error {

@@ -19,7 +19,7 @@ func TestNginx(t *testing.T) {
 			Timeout:  1 * time.Second,
 			Retries:  5,
 		}),
-		boxd.WithPort("80/tcp"),
+		boxd.WithPort("80"),
 		boxd.WithWait(boxd.WaitForHealthy(30*time.Second)),
 	)
 

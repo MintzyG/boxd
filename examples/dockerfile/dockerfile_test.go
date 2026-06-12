@@ -21,7 +21,7 @@ func TestLocalApp(t *testing.T) {
 			Timeout:  1 * time.Second,
 			Retries:  5,
 		}),
-		boxd.WithPort("8080/tcp"),
+		boxd.WithPort("8080"),
 		boxd.WithWait(boxd.WaitForHealthy(30*time.Second)),
 		boxd.WithLogs(boxd.LogAlways),
 	)

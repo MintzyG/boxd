@@ -8,14 +8,19 @@ import (
 	"testing"
 )
 
-// Port returns the host-side port mapped to the given container port number.
-// The port argument is just the number, e.g. "5432" no protocol suffix needed.
+// normalizePort appends "/tcp" if port has no protocol suffix.
+func normalizePort(port string) string {
+	if strings.Contains(port, "/") {
+		return port
+	}
+	return port + "/tcp"
+}
+
+// Port returns the host-side port mapped to the given container port.
+// Accepts a bare number ("5432") or a full port/protocol pair ("5432/tcp").
 // Returns an empty string if the port was not mapped.
 func (c *Container) Port(port string) string {
-	if p, ok := c.Ports[port+"/tcp"]; ok {
-		return p
-	}
-	return c.Ports[port+"/udp"]
+	return c.Ports[normalizePort(port)]
 }
 
 func dockerHost() string {
