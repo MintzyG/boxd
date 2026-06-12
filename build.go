@@ -12,6 +12,7 @@ import (
 type buildConfig struct {
 	context    string
 	dockerfile string
+	noCache    bool
 }
 
 // WithDockerfile builds an image from a local Dockerfile and runs it.
@@ -28,12 +29,21 @@ func WithDockerfile(contextPath string, dockerfile ...string) Option {
 	}
 }
 
+// WithNoCache disables Docker's build cache for this build.
+func WithNoCache() Option {
+	return func(c *config) {
+		if c.build != nil {
+			c.build.noCache = true
+		}
+	}
+}
+
 func buildImage(ctx context.Context, d *dockerClient, bc *buildConfig) (string, error) {
 	archive, err := tarDir(bc.context)
 	if err != nil {
 		return "", err
 	}
-	return d.build(ctx, archive, bc.dockerfile)
+	return d.build(ctx, archive, bc.dockerfile, bc.noCache)
 }
 
 func tarDir(dir string) (io.Reader, error) {
