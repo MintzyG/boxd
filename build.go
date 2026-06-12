@@ -2,7 +2,6 @@ package boxd
 
 import (
 	"archive/tar"
-	"bytes"
 	"context"
 	"io"
 	"os"
@@ -36,45 +35,44 @@ func WithNoCache() Option {
 }
 
 func buildImage(ctx context.Context, d *dockerClient, bc *buildConfig) (string, error) {
-	archive, err := tarDir(bc.context)
-	if err != nil {
-		return "", err
-	}
-	return d.build(ctx, archive, bc.dockerfile, bc.noCache)
+	return d.build(ctx, tarDir(bc.context), bc.dockerfile, bc.noCache)
 }
 
-func tarDir(dir string) (io.Reader, error) {
-	var buf bytes.Buffer
-	tw := tar.NewWriter(&buf)
-
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+func tarDir(dir string) io.Reader {
+	pr, pw := io.Pipe()
+	go func() {
+		tw := tar.NewWriter(pw)
+		err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			hdr, err := tar.FileInfoHeader(info, "")
+			if err != nil {
+				return err
+			}
+			hdr.Name, err = filepath.Rel(dir, path)
+			if err != nil {
+				return err
+			}
+			if err = tw.WriteHeader(hdr); err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+			f, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			_, err = io.Copy(tw, f)
+			return err
+		})
 		if err != nil {
-			return err
+			pw.CloseWithError(err)
+			return
 		}
-		hdr, err := tar.FileInfoHeader(info, "")
-		if err != nil {
-			return err
-		}
-		hdr.Name, err = filepath.Rel(dir, path)
-		if err != nil {
-			return err
-		}
-		if err = tw.WriteHeader(hdr); err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		_, err = io.Copy(tw, f)
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &buf, tw.Close()
+		pw.CloseWithError(tw.Close())
+	}()
+	return pr
 }
