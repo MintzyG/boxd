@@ -87,24 +87,14 @@ func newDockerClient() *dockerClient {
 	}
 }
 
-func (d *dockerClient) do(ctx context.Context, method, path string, body any) (*http.Response, error) {
-	var r io.Reader
-	if body != nil {
-		b, err := json.Marshal(body)
-		if err != nil {
-			return nil, err
-		}
-		r = bytes.NewReader(b)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, d.baseURL+path, r)
+func (d *dockerClient) doRaw(ctx context.Context, method, path, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, method, d.baseURL+path, body)
 	if err != nil {
 		return nil, err
 	}
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+	if contentType != "" {
+		req.Header.Set("Content-Type", contentType)
 	}
-
 	resp, err := d.http.Do(req)
 	if err != nil {
 		return nil, err
@@ -115,6 +105,20 @@ func (d *dockerClient) do(ctx context.Context, method, path string, body any) (*
 		return nil, fmt.Errorf("docker: %s %s -> %d: %s", method, path, resp.StatusCode, b)
 	}
 	return resp, nil
+}
+
+func (d *dockerClient) do(ctx context.Context, method, path string, body any) (*http.Response, error) {
+	var r io.Reader
+	var ct string
+	if body != nil {
+		b, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		r = bytes.NewReader(b)
+		ct = "application/json"
+	}
+	return d.doRaw(ctx, method, path, ct, r)
 }
 
 func (d *dockerClient) pull(ctx context.Context, image string) error {
@@ -174,25 +178,16 @@ func (d *dockerClient) logs(ctx context.Context, id string) (io.ReadCloser, erro
 }
 
 func (d *dockerClient) build(ctx context.Context, tar io.Reader, dockerfile string, noCache bool) (string, error) {
-	url := d.baseURL + "/build?dockerfile=" + dockerfile + "&rm=true"
+	path := "/build?dockerfile=" + dockerfile + "&rm=true"
 	if noCache {
-		url += "&nocache=1"
+		path += "&nocache=1"
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, tar)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Content-Type", "application/x-tar")
 
-	resp, err := d.http.Do(req)
+	resp, err := d.doRaw(ctx, http.MethodPost, path, "application/x-tar", tar)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		b, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("docker: build -> %d: %s", resp.StatusCode, b)
-	}
 
 	var imageID string
 	dec := json.NewDecoder(resp.Body)
