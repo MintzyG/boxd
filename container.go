@@ -2,8 +2,22 @@ package boxd
 
 import (
 	"context"
+	"net/url"
+	"os"
+	"strings"
 	"testing"
 )
+
+func dockerHost() string {
+	if host := os.Getenv("DOCKER_HOST"); host != "" {
+		if strings.HasPrefix(host, "tcp://") {
+			if u, err := url.Parse(host); err == nil {
+				return u.Hostname()
+			}
+		}
+	}
+	return "localhost"
+}
 
 func createContainer(t *testing.T, ctx context.Context, d *dockerClient, image string, cfg *config) string {
 	t.Helper()
@@ -54,5 +68,5 @@ func inspectContainer(t *testing.T, ctx context.Context, d *dockerClient, id str
 		}
 	}
 
-	return &Container{ID: id, Host: "localhost", Ports: ports, d: d}
+	return &Container{ID: id, Host: dockerHost(), Ports: ports, d: d}
 }

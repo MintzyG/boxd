@@ -8,19 +8,38 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 )
 
 type dockerClient struct {
-	http *http.Client
+	http    *http.Client
+	baseURL string
 }
 
 func newDockerClient() *dockerClient {
+	socketPath := "/var/run/docker.sock"
+	baseURL := "http://docker"
+
+	if host := os.Getenv("DOCKER_HOST"); host != "" {
+		switch {
+		case strings.HasPrefix(host, "unix://"):
+			socketPath = strings.TrimPrefix(host, "unix://")
+		case strings.HasPrefix(host, "tcp://"):
+			// TCP host: use it directly without a Unix socket transport.
+			return &dockerClient{
+				http:    &http.Client{},
+				baseURL: "http://" + strings.TrimPrefix(host, "tcp://"),
+			}
+		}
+	}
+
 	return &dockerClient{
+		baseURL: baseURL,
 		http: &http.Client{
 			Transport: &http.Transport{
 				DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-					return net.Dial("unix", "/var/run/docker.sock")
+					return net.Dial("unix", socketPath)
 				},
 			},
 		},
@@ -37,7 +56,7 @@ func (d *dockerClient) do(ctx context.Context, method, path string, body any) (*
 		r = bytes.NewReader(b)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, method, "http://localhost"+path, r)
+	req, err := http.NewRequestWithContext(ctx, method, d.baseURL+path, r)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +133,7 @@ func (d *dockerClient) logs(ctx context.Context, id string) (io.ReadCloser, erro
 }
 
 func (d *dockerClient) build(ctx context.Context, tar io.Reader, dockerfile string, noCache bool) (string, error) {
-	url := "http://localhost/build?dockerfile=" + dockerfile + "&rm=true"
+	url := d.baseURL + "/build?dockerfile=" + dockerfile + "&rm=true"
 	if noCache {
 		url += "&nocache=1"
 	}
