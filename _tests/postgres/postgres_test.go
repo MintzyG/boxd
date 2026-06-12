@@ -1,3 +1,7 @@
+// Integration test against a real Postgres container using boxd.Run directly.
+// Not picked up by the normal test run (underscore prefix excludes this directory
+// from the Go build system). Run explicitly with: go test ./...
+// from inside this directory.
 package postgres_test
 
 import (

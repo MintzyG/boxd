@@ -1,3 +1,6 @@
+// Example showing how to wrap boxd.Run in a typed helper for repeated use.
+// The postgres package here is the pattern to follow when building higher-level
+// abstractions over boxd in your own project.
 package postgres_test
 
 import (
